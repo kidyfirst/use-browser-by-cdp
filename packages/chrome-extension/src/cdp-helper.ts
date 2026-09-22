@@ -69,8 +69,22 @@ export async function checkCDPStatus(serverUrl = 'http://localhost:5173'): Promi
 
 export function getLaunchCommands(): { mac: string; linux: string; win: string } {
   return {
-    mac: `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --user-data-dir="/tmp/chrome-cdp-profile"`,
-    linux: `google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-cdp-profile`,
-    win: `"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222 --user-data-dir="%TEMP%\\chrome-cdp-profile"`,
+    mac: `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --remote-allow-origins="*" --user-data-dir="$HOME/.moni-chrome-cdp-profile" --no-first-run`,
+    linux: `google-chrome --remote-debugging-port=9222 --remote-allow-origins="*" --user-data-dir="$HOME/.moni-chrome-cdp-profile" --no-first-run`,
+    win: `"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222 --remote-allow-origins="*" --user-data-dir="%USERPROFILE%\\.moni-chrome-cdp-profile" --no-first-run`,
   };
 }
+
+export async function autoLaunchChrome(serverUrl = 'http://localhost:5173'): Promise<{ success: boolean; browser?: string; error?: string }> {
+  try {
+    const res = await fetch(`${serverUrl}/api/agent/launch-browser`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const data = (await res.json()) as any;
+    return data;
+  } catch (err: any) {
+    return { success: false, error: err.message || '无法连接后台服务' };
+  }
+}
+

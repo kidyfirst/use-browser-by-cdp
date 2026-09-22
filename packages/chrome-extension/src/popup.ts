@@ -2,7 +2,7 @@
  * Popup UI logic for Moni Browser Agent Chrome Extension.
  */
 
-import { checkCDPStatus, getLaunchCommands } from './cdp-helper.js';
+import { autoLaunchChrome, checkCDPStatus, getLaunchCommands } from './cdp-helper.js';
 import { getStoredSettings, saveRecentGoal, saveStoredSettings, type ModelSettings } from './storage.js';
 
 let currentSettings: ModelSettings;
@@ -128,6 +128,29 @@ function setupOSTabs(): void {
   copyBtn?.addEventListener('click', async () => {
     await navigator.clipboard.writeText(launchCommands[selectedOS]);
     showToast('✓ 已复制 Chrome 启动命令到剪贴板');
+  });
+
+  const autoLaunchBtn = document.getElementById('autoLaunchChromeBtn');
+  autoLaunchBtn?.addEventListener('click', async () => {
+    showToast('⏳ 正在拉起调试 Chrome 浏览器...');
+    if (autoLaunchBtn) autoLaunchBtn.setAttribute('disabled', 'true');
+    try {
+      const res = await autoLaunchChrome(currentSettings.serverUrl);
+      if (res.success) {
+        showToast('✓ 调试 Chrome 启动成功！');
+        await refreshCDPStatus();
+      } else {
+        showToast(`❌ 启动失败: ${res.error || '未知错误'}`);
+      }
+    } finally {
+      if (autoLaunchBtn) autoLaunchBtn.removeAttribute('disabled');
+    }
+  });
+
+  const copyPnpmBtn = document.getElementById('copyPnpmCmdBtn');
+  copyPnpmBtn?.addEventListener('click', async () => {
+    await navigator.clipboard.writeText('pnpm run start:chrome');
+    showToast('✓ 已复制命令: pnpm run start:chrome');
   });
 }
 

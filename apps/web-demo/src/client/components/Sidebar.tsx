@@ -6,12 +6,14 @@ interface SidebarProps {
   activeModule: ActiveModule;
   onSelectModule: (module: ActiveModule) => void;
   isConnected: boolean;
+  onLaunchBrowser?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeModule,
   onSelectModule,
   isConnected,
+  onLaunchBrowser,
 }) => {
   return (
     <aside className="sidebar">
@@ -64,6 +66,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>{isConnected ? '已连接' : '未连接'}</span>
           </div>
         </div>
+
+        {!isConnected && onLaunchBrowser && (
+          <button
+            type="button"
+            className="btn btn-primary"
+            style={{ width: '100%', padding: '6px 10px', fontSize: '11px', marginTop: '6px' }}
+            onClick={onLaunchBrowser}
+          >
+            🚀 一键启动调试 Chrome
+          </button>
+        )}
+
         <div style={{ fontSize: '10px', color: '#475569', textAlign: 'center' }}>
           use-browser-by-cdp v0.1.0 (Monorepo)
         </div>

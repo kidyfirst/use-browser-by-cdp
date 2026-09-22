@@ -35,7 +35,17 @@
           Chrome 需开启 <code>--remote-debugging-port=9222</code>，并在项目根目录运行 <code>pnpm dev</code>。
         </div>
 
+        <div id="cdpLaunchActions" style="margin-top: 6px; display: flex; gap: 6px; align-items: center;">
+          <button type="button" class="btn btn-primary" id="autoLaunchChromeBtn" style="padding: 6px 12px; font-size: 11px; flex: 1;">
+            🚀 一键启动调试 Chrome
+          </button>
+          <button type="button" class="btn btn-outline" id="copyPnpmCmdBtn" title="复制 pnpm start:chrome 命令" style="padding: 6px 10px; font-size: 11px;">
+            📋 复制 pnpm 命令
+          </button>
+        </div>
+
         <div id="cdpCommandArea">
+          <div style="font-size: 10px; color: var(--text-muted); margin-top: 6px;">或手动在系统终端运行：</div>
           <div style="display: flex; gap: 4px; margin-top: 4px;">
             <button type="button" class="copy-btn" id="tabMacBtn" style="font-weight: bold;">macOS</button>
             <button type="button" class="copy-btn" id="tabWinBtn">Windows</button>

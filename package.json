@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "description": "General-purpose high-precision browser automation driver over CDP with React demo",
+  "type": "module",
   "scripts": {
     "build": "pnpm -r run build",
     "dev": "pnpm --filter @moni/web-demo dev",
     "test": "pnpm -r --filter \"@moni/cdp-driver\" --filter \"@moni/nl-browser\" test",
     "typecheck": "pnpm -r run typecheck",
+    "start:chrome": "node scripts/start-chrome.js",
     "publish:driver": "pnpm --filter @moni/cdp-driver run prepublishOnly && pnpm --filter @moni/cdp-driver publish --access public",
     "publish:nl": "pnpm --filter @moni/nl-browser run prepublishOnly && pnpm --filter @moni/nl-browser publish --access public",
     "package:extension": "pnpm --filter @moni/chrome-extension run package"

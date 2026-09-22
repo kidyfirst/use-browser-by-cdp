@@ -54,19 +54,35 @@ pnpm run package:extension
 - **最新别名 ZIP**：`packages/chrome-extension/release/moni-chrome-extension-latest.zip`
 ---
 
-## Chrome CDP 启动命令参考
+## 开启 Chrome 调试端口 (9222) 的 3 种稳妥方式
 
-当插件提示未开启 CDP 端口时，需先完全退出 Chrome，并在终端执行相应系统的启动命令：
+由于现代 Chrome 的单例机制与安全策略，如果直接双击打开 Chrome，调试端口可能不会开启。以下是 3 种稳定可靠的启动方式：
+
+### 方式 1：插件界面一键拉起（推荐，零命令行负担）
+在开启后台服务（`pnpm dev`）后，打开插件弹窗，直接点击提示横幅中的 **"🚀 一键启动调试 Chrome"** 按钮。
+后台服务将自动搜寻本地 Chrome 安装路径，以独立调试 Profile 启动 Chrome 并开启 9222 端口，插件弹窗会在 3 秒内自动检测并转绿。
+
+### 方式 2：使用统一 Node/CLI 命令
+在项目根目录下直接运行：
+```bash
+pnpm run start:chrome
+```
+该脚本会自动检测 9222 端口状态。若已开启则复用已有进程，未开启则自动以安全的参数启动 Chrome。
+
+### 方式 3：终端手动启动命令
+若需在终端手动启动，建议使用带有 `--remote-allow-origins="*"` 与独立 Profile 目录的命令：
 
 - **macOS**:
   ```bash
-  /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-cdp-profile
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --remote-allow-origins="*" --user-data-dir="$HOME/.moni-chrome-cdp-profile" --no-first-run
   ```
 - **Linux**:
   ```bash
-  google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-cdp-profile
+  google-chrome --remote-debugging-port=9222 --remote-allow-origins="*" --user-data-dir="$HOME/.moni-chrome-cdp-profile" --no-first-run
   ```
-- **Windows (CMD/PowerShell)**:
+- **Windows (PowerShell / CMD)**:
   ```cmd
-  "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="%TEMP%\chrome-cdp-profile"
+  "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --remote-allow-origins="*" --user-data-dir="%USERPROFILE%\.moni-chrome-cdp-profile" --no-first-run
   ```
+> **提示**：使用 `$HOME/.moni-chrome-cdp-profile` 作为数据目录，可以保证登录态和 Cookie 长期安全保存，无需每次重新扫码登录。
+

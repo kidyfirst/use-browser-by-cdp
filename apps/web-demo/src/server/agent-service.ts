@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Browser, type ObservedAction, type PageState } from '@moni/cdp-driver';
+import { Browser, launchChrome, type ObservedAction, type PageState } from '@moni/cdp-driver';
 import { NLBrowser, type NLBrowserOptions } from '@moni/nl-browser';
 import { handleIframeProxy } from './proxy-handler.js';
 
@@ -141,6 +141,21 @@ export function cdpAgentMiddleware(
       res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify({ error: err.message }));
     });
+    return;
+  }
+
+  // 2.1 Launch Chrome with CDP port 9222
+  if (url.pathname === '/api/agent/launch-browser' && req.method === 'POST') {
+    launchChrome({ port: 9222 })
+      .then((result) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ success: true, ...result }));
+      })
+      .catch((err) => {
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      });
     return;
   }
 

@@ -37,6 +37,22 @@ export const App: React.FC = () => {
     checkStatus();
   }, [checkStatus]);
 
+  const handleLaunchBrowser = async () => {
+    try {
+      showToast('正在启动调试 Chrome 浏览器...');
+      const res = await fetch('/api/agent/launch-browser', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('✓ 调试 Chrome 启动成功，端口 9222 已就绪');
+        checkStatus();
+      } else {
+        alert(`启动失败: ${data.error || '未知错误'}`);
+      }
+    } catch (err: any) {
+      alert(`无法连接后台服务: ${err.message}`);
+    }
+  };
+
   const handleNavigate = async (url: string) => {
     setIsLoading(true);
     try {
@@ -114,6 +130,7 @@ export const App: React.FC = () => {
         activeModule={activeModule}
         onSelectModule={(mod) => setActiveModule(mod)}
         isConnected={isConnected}
+        onLaunchBrowser={handleLaunchBrowser}
       />
 
       {/* Right Content View */}

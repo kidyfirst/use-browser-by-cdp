@@ -19,6 +19,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@moni/cdp-driver': path.resolve(__dirname, '../../packages/cdp-driver/src/index.ts'),
+      '@moni/nl-browser': path.resolve(__dirname, '../../packages/nl-browser/src/index.ts'),
     },
   },
   server: {

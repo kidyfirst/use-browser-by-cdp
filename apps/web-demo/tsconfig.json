@@ -4,7 +4,8 @@
     "outDir": "./dist",
     "jsx": "react-jsx",
     "paths": {
-      "@moni/cdp-driver": ["../../packages/cdp-driver/src/index.ts"]
+      "@moni/cdp-driver": ["../../packages/cdp-driver/src/index.ts"],
+      "@moni/nl-browser": ["../../packages/nl-browser/src/index.ts"]
     }
   },
   "include": ["src/**/*", "vite.config.ts"],

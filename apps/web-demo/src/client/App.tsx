@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { PageState, ObservedAction } from '@moni/cdp-driver';
-import { UrlInputBar } from './components/UrlInputBar';
-import { FramePreview } from './components/FramePreview';
-import { ElementList } from './components/ElementList';
-import { JsonViewer } from './components/JsonViewer';
+import { Sidebar, type ActiveModule } from './components/Sidebar';
+import { CDPDriverView } from './components/CDPDriverView';
+import { NLBrowserView } from './components/NLBrowserView';
 
 export const App: React.FC = () => {
+  const [activeModule, setActiveModule] = useState<ActiveModule>('cdp-driver');
   const [currentUrl, setCurrentUrl] = useState<string>('');
   const [pageState, setPageState] = useState<PageState | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,7 +55,7 @@ export const App: React.FC = () => {
       setCurrentUrl(url);
       setPageState(data.page);
       setIsConnected(true);
-      showToast(`Successfully connected and observed: ${data.page.title || url}`);
+      showToast(`Connected & Observed: ${data.page.title || url}`);
     } catch (err: any) {
       alert(`Navigation failed: ${err.message}`);
     } finally {
@@ -107,86 +107,31 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleDisconnect = async () => {
-    try {
-      await fetch('/api/agent/close', { method: 'POST' });
-      setIsConnected(false);
-      setPageState(null);
-      setCurrentUrl('');
-      showToast('Browser disconnected');
-    } catch (err: any) {
-      alert(`Disconnect error: ${err.message}`);
-    }
-  };
-
   return (
-    <div className="app-container">
-      {/* Header */}
-      <header className="app-header">
-        <div className="brand">
-          <span className="brand-icon">⚡</span>
-          <div>
-            <div className="brand-title">CDP Browser Driver & Agent</div>
-            <div className="brand-subtitle">@moni/cdp-driver High-Precision Browser Automation</div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
-            className={`status-badge ${
-              isLoading ? 'loading' : isConnected ? 'connected' : 'disconnected'
-            }`}
-          >
-            <span className="status-dot" />
-            <span>
-              {isLoading ? 'Processing' : isConnected ? 'CDP Active' : 'Disconnected'}
-            </span>
-          </div>
-
-          {isConnected && (
-            <button
-              type="button"
-              className="quick-link-btn"
-              style={{ color: 'var(--danger-color)' }}
-              onClick={handleDisconnect}
-            >
-              Disconnect
-            </button>
-          )}
-        </div>
-      </header>
-
-      {/* URL Input Bar */}
-      <UrlInputBar
-        currentUrl={currentUrl}
-        isLoading={isLoading}
-        onNavigate={handleNavigate}
-        onRefresh={handleRefresh}
+    <div className="app-layout">
+      {/* Left Sidebar Menu */}
+      <Sidebar
+        activeModule={activeModule}
+        onSelectModule={(mod) => setActiveModule(mod)}
+        isConnected={isConnected}
       />
 
-      {/* Main Content Area */}
-      <div className="preview-grid">
-        {/* Left: Frame Preview */}
-        <FramePreview
-          url={currentUrl}
-          title={pageState?.title}
-          isLoading={isLoading}
-        />
-
-        {/* Right: Structured Elements List */}
-        <ElementList
-          pageState={pageState}
-          onExecuteAction={handleExecuteAction}
-          isLoading={isLoading}
-        />
-
-        {/* Bottom Full-Width: JSON Tree & Raw Editor */}
-        <JsonViewer
-          data={pageState}
-          title="Extracted Page State & Elements Tree"
-          onDataChange={(newData) => setPageState(newData)}
-        />
-      </div>
+      {/* Right Content View */}
+      <main className="main-view">
+        {activeModule === 'cdp-driver' ? (
+          <CDPDriverView
+            currentUrl={currentUrl}
+            pageState={pageState}
+            isLoading={isLoading}
+            onNavigate={handleNavigate}
+            onRefresh={handleRefresh}
+            onExecuteAction={handleExecuteAction}
+            onPageStateChange={(newState) => setPageState(newState)}
+          />
+        ) : (
+          <NLBrowserView onShowToast={showToast} />
+        )}
+      </main>
 
       {toastMessage && <div className="toast">ℹ️ {toastMessage}</div>}
     </div>

@@ -6,12 +6,16 @@
   "private": true,
   "scripts": {
     "build": "tsc",
+    "package": "tsc && node scripts/package.js",
+    "pack": "npm run package",
     "typecheck": "tsc --noEmit",
     "watch": "tsc -w"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
     "@types/chrome": "^0.0.270",
     "@types/node": "^20.14.12",
+    "adm-zip": "^0.6.1",
     "typescript": "^5.5.4"
   },
   "license": "MIT"

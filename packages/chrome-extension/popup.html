@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moni Browser Agent Helper</title>
+    <link rel="stylesheet" href="styles/popup.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <div>
+          <div class="brand-title">Moni Browser Agent</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span id="statusIndicator" class="status-dot" title="正在检测 CDP 状态..."></span>
+        <button type="button" id="toggleSettingsBtn" class="icon-btn" title="配置模型参数">
+          ⚙️ 设置
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainView" class="container">
+      <!-- CDP Launch Guidance (Shown if CDP / Server not detected) -->
+      <div id="cdpGuideBanner" class="banner warning" style="display: none;">
+        <div style="font-weight: 600; display: flex; align-items: center; gap: 6px;">
+          <span>⚠️ 未检测到 CDP 调试端口 (9222)</span>
+        </div>
+        <div style="font-size: 11px; color: #fde68a;">
+          Chrome 需开启 <code>--remote-debugging-port=9222</code>，并在项目根目录运行 <code>pnpm dev</code>。
+        </div>
+
+        <div style="display: flex; gap: 4px; margin-top: 4px;">
+          <button type="button" class="copy-btn" id="tabMacBtn" style="font-weight: bold;">macOS</button>
+          <button type="button" class="copy-btn" id="tabWinBtn">Windows</button>
+          <button type="button" class="copy-btn" id="tabLinuxBtn">Linux</button>
+        </div>
+
+        <div class="code-snippet-box">
+          <span id="launchCommandText" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+          <button type="button" class="copy-btn" id="copyCmdBtn">复制启动命令</button>
+        </div>
+      </div>
+
+      <!-- Task Form -->
+      <div class="form-group">
+        <label class="form-label">目标网页 URL</label>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="targetUrlInput" class="form-input" placeholder="https://..." />
+          <button type="button" class="icon-btn" id="useCurrentTabBtn" title="填入当前活动标签页网址">
+            当前页
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">自然语言任务目标 (Goal)</label>
+        <textarea
+          id="goalInput"
+          class="form-input"
+          placeholder="例如：在搜索框中输入 AI Agent 并点击搜索按钮..."
+        ></textarea>
+      </div>
+
+      <!-- Preset Chips -->
+      <div class="form-group">
+        <label class="form-label">常用快捷任务</label>
+        <div class="chips-row">
+          <button type="button" class="chip" data-goal="搜索关于 AI Agent 的最新内容并打开第一条结果">
+            HN 搜索 AI Agent
+          </button>
+          <button type="button" class="chip" data-goal="点击页面上的 Learn more 链接">
+            点击 Learn more
+          </button>
+          <button type="button" class="chip" data-goal="查看热门榜单第一名项目并点击进入">
+            查看 GitHub 榜首
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 8px;">
+        <button type="button" id="runAutoBtn" class="btn btn-purple" style="flex: 1;">
+          🚀 全自动运行
+        </button>
+        <button type="button" id="stepTickBtn" class="btn btn-primary">
+          ⏭️ 单步 Tick
+        </button>
+        <button type="button" id="stopBtn" class="btn btn-danger" style="display: none;">
+          ⏹️ 停止
+        </button>
+      </div>
+
+      <!-- Live Execution Log -->
+      <div class="form-group" id="logSection" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label class="form-label">执行记录 (<span id="logCount">0</span> 步)</label>
+          <span id="agentStatusBadge" style="font-size: 11px; color: #93c5fd;"></span>
+        </div>
+        <div class="log-card" id="logList"></div>
+      </div>
+    </main>
+
+    <!-- Settings View (Modal / Panel) -->
+    <div id="settingsView" class="container" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 14px; font-weight: 700;">⚙️ 模型与服务参数配置</h3>
+        <button type="button" id="closeSettingsBtn" class="icon-btn">✕ 关闭</button>
+      </div>
+
+      <div style="font-size: 11px; color: var(--text-muted);">
+        插件配置将保存在 <code>chrome.storage</code>，也可在服务端 <code>.env</code> 中直接配置。
+      </div>
+
+      <!-- Server URL -->
+      <div class="form-group">
+        <label class="form-label">Agent 服务端地址</label>
+        <input type="text" id="cfgServerUrl" class="form-input" placeholder="http://localhost:5173" />
+      </div>
+
+      <!-- JEV Model -->
+      <div style="border-top: 1px solid var(--border-color); padding-top: 8px;" class="form-group">
+        <label class="form-label" style="color: #93c5fd;">JEV UI 决策模型 (TypeSafe)</label>
+        <input type="password" id="cfgJevApiKey" class="form-input" placeholder="TYPESAFE_API_KEY" />
+        <input type="text" id="cfgJevBaseUrl" class="form-input" placeholder="Base URL: https://api.typesafe.ai/v1/systemone" style="margin-top: 4px;" />
+        <input type="text" id="cfgJevModel" class="form-input" placeholder="Model: jev-latest" style="margin-top: 4px;" />
+      </div>
+
+      <!-- LLM Text Model -->
+      <div style="border-top: 1px solid var(--border-color); padding-top: 8px;" class="form-group">
+        <label class="form-label" style="color: #fbbf24;">LLM 文本生成模型 (OpenAI / DeepSeek)</label>
+        <input type="password" id="cfgTextApiKey" class="form-input" placeholder="TEXT_MODEL_API_KEY" />
+        <input type="text" id="cfgTextBaseUrl" class="form-input" placeholder="Base URL: https://api.deepseek.com/v1" style="margin-top: 4px;" />
+        <input type="text" id="cfgTextModel" class="form-input" placeholder="Model: deepseek-chat" style="margin-top: 4px;" />
+      </div>
+
+      <button type="button" id="saveSettingsBtn" class="btn btn-purple" style="margin-top: 8px;">
+        💾 保存配置
+      </button>
+    </div>
+
+    <div id="toast" class="toast" style="display: none;"></div>
+
+    <script type="module" src="dist/popup.js"></script>
+  </body>
+</html>

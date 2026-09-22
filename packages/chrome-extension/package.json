@@ -1,0 +1,18 @@
+{
+  "name": "@moni/chrome-extension",
+  "version": "0.1.0",
+  "description": "Chrome Extension helper for @moni/cdp-driver and @moni/nl-browser with CDP port guidance, model settings, and task executor",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.270",
+    "@types/node": "^20.14.12",
+    "typescript": "^5.5.4"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Moni Browser Agent Helper",
+  "version": "0.1.0",
+  "description": "Assistant for @moni/cdp-driver and @moni/nl-browser: CDP port guidance, model settings, and task executor.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://localhost:*/*",
+    "http://127.0.0.1:*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Moni Browser Agent"
+  },
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  }
+}

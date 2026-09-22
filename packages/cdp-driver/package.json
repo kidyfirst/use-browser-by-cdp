@@ -1,0 +1,43 @@
+{
+  "name": "@moni/cdp-driver",
+  "version": "0.1.0",
+  "description": "High-precision general-purpose browser CDP driver with pre-flight guards and atomic snapshot",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm run test && pnpm run build",
+    "publish:dry": "npm publish --dry-run",
+    "publish:pkg": "npm publish --access public"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.12",
+    "@types/ws": "^8.5.12",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  },
+  "keywords": [
+    "cdp",
+    "chrome-devtools-protocol",
+    "browser-automation",
+    "dom-snapshot",
+    "agent-actuator"
+  ],
+  "license": "MIT"
+}

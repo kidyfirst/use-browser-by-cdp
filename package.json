@@ -1,0 +1,16 @@
+{
+  "name": "use-browser-by-cdp-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "General-purpose high-precision browser automation driver over CDP with React demo",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm --filter @moni/web-demo dev",
+    "test": "pnpm --filter @moni/cdp-driver test",
+    "typecheck": "pnpm -r run typecheck",
+    "publish:driver": "pnpm --filter @moni/cdp-driver run prepublishOnly && pnpm --filter @moni/cdp-driver publish --access public"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

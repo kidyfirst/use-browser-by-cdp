@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Moni Browser Agent Helper",
   "version": "0.1.0",
-  "description": "Assistant for @moni/cdp-driver and @moni/nl-browser: CDP port guidance, model settings, and task executor.",
+  "description": "可通过自然语言控制浏览器自动执行任务，不读取，不存储用户浏览器Cookie等个人信息。",
   "permissions": [
     "storage",
     "tabs",

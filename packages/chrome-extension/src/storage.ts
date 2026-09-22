@@ -24,11 +24,20 @@ export const DEFAULT_SETTINGS: ModelSettings = {
 
 export async function getStoredSettings(): Promise<ModelSettings> {
   const data = await chrome.storage.local.get('modelSettings');
-  return { ...DEFAULT_SETTINGS, ...(data['modelSettings'] || {}) };
+  return {
+    ...DEFAULT_SETTINGS,
+    ...(data['modelSettings'] || {}),
+    serverUrl: 'http://localhost:5173',
+  };
 }
 
 export async function saveStoredSettings(settings: ModelSettings): Promise<void> {
-  await chrome.storage.local.set({ modelSettings: settings });
+  await chrome.storage.local.set({
+    modelSettings: {
+      ...settings,
+      serverUrl: 'http://localhost:5173',
+    },
+  });
 }
 
 export async function getRecentGoals(): Promise<string[]> {

@@ -307,7 +307,7 @@ function setupSettingsModal(): void {
   const tModel = document.getElementById('cfgTextModel') as HTMLInputElement;
 
   const populateInputs = () => {
-    if (sUrl) sUrl.value = currentSettings.serverUrl;
+    if (sUrl) sUrl.value = 'http://localhost:5173';
     if (jKey) jKey.value = currentSettings.typesafeApiKey;
     if (jBase) jBase.value = currentSettings.typesafeBaseUrl;
     if (jModel) jModel.value = currentSettings.typesafeModel;
@@ -329,7 +329,7 @@ function setupSettingsModal(): void {
 
   saveBtn?.addEventListener('click', async () => {
     currentSettings = {
-      serverUrl: sUrl.value.trim() || 'http://localhost:5173',
+      serverUrl: 'http://localhost:5173',
       typesafeApiKey: jKey.value.trim(),
       typesafeBaseUrl: jBase.value.trim() || 'https://api.typesafe.ai/v1/systemone',
       typesafeModel: jModel.value.trim() || 'jev-latest',

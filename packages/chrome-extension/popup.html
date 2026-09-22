@@ -129,10 +129,21 @@
         插件配置将保存在 <code>chrome.storage</code>，也可在服务端 <code>.env</code> 中直接配置。
       </div>
 
-      <!-- Server URL -->
+      <!-- Server URL (Read-only) -->
       <div class="form-group">
-        <label class="form-label">Agent 服务端地址</label>
-        <input type="text" id="cfgServerUrl" class="form-input" placeholder="http://localhost:5173" />
+        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>Agent 服务端地址</span>
+          <span style="font-size: 10px; color: var(--text-muted); text-transform: none; font-weight: normal;">🔒 固定只读</span>
+        </label>
+        <input
+          type="text"
+          id="cfgServerUrl"
+          class="form-input"
+          value="http://localhost:5173"
+          readonly
+          tabindex="-1"
+          title="服务端地址固定为本地服务 http://localhost:5173，仅供查看"
+        />
       </div>
 
       <!-- JEV Model -->

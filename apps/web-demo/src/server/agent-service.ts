@@ -1,12 +1,57 @@
 /**
  * CDP Agent Server Service.
  * Exposes REST API endpoints to drive Chrome via @moni/cdp-driver and @moni/nl-browser.
+ *
+ * Model keys and endpoints are configured securely on the server via .env
+ * (e.g. TYPESAFE_API_KEY, TEXT_MODEL_API_KEY, etc.) and are never passed from client requests.
  */
 
+import fs from 'node:fs';
 import http from 'node:http';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Browser, type ObservedAction, type PageState } from '@moni/cdp-driver';
 import { NLBrowser, type NLBrowserOptions } from '@moni/nl-browser';
 import { handleIframeProxy } from './proxy-handler.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Auto-load .env files from apps/web-demo/.env or workspace root .env
+function loadServerEnv(): void {
+  const candidateEnvFiles = [
+    path.resolve(__dirname, '../../.env'),
+    path.resolve(__dirname, '../../../../.env'),
+    path.resolve(process.cwd(), '.env'),
+  ];
+
+  for (const envFile of candidateEnvFiles) {
+    if (fs.existsSync(envFile)) {
+      try {
+        if (typeof process.loadEnvFile === 'function') {
+          process.loadEnvFile(envFile);
+        } else {
+          const content = fs.readFileSync(envFile, 'utf8');
+          for (const line of content.split(/\r?\n/)) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('#')) continue;
+            const eqIdx = trimmed.indexOf('=');
+            if (eqIdx > 0) {
+              const key = trimmed.slice(0, eqIdx).trim();
+              const val = trimmed.slice(eqIdx + 1).trim().replace(/^["'](.*)["']$/, '$1');
+              if (!(key in process.env)) {
+                process.env[key] = val;
+              }
+            }
+          }
+        }
+      } catch {
+        // continue
+      }
+    }
+  }
+}
+loadServerEnv();
 
 let activeBrowser: Browser | null = null;
 let activeNLAgent: NLBrowser | null = null;
@@ -109,8 +154,12 @@ export function cdpAgentMiddleware(
         JSON.stringify({
           active: Boolean(activeNLAgent),
           snapshot: activeNLAgent ? activeNLAgent.snapshot() : null,
+          has_jev_key: Boolean(process.env['TYPESAFE_API_KEY']),
+          has_text_key: Boolean(process.env['TEXT_MODEL_API_KEY'] || process.env['OPENAI_API_KEY']),
           text_model: process.env['TEXT_MODEL'] || 'deepseek-chat',
+          text_base_url: process.env['TEXT_MODEL_BASE_URL'] || 'https://api.deepseek.com/v1',
           jev_model: process.env['TYPESAFE_MODEL'] || 'jev-latest',
+          jev_base_url: process.env['TYPESAFE_BASE_URL'] || 'https://api.typesafe.ai/v1/systemone',
         })
       );
       return;
@@ -136,7 +185,7 @@ export function cdpAgentMiddleware(
           const subAction = url.pathname.replace('/api/nl/', '');
 
           if (subAction === 'start') {
-            const { targetUrl, goal, jev, textModel, maxSteps } = body;
+            const { targetUrl, goal, maxSteps } = body;
             if (!targetUrl || !goal) {
               throw new Error('Please provide targetUrl and goal');
             }
@@ -146,10 +195,9 @@ export function cdpAgentMiddleware(
               activeNLAgent = null;
             }
 
+            // Model keys and endpoints are configured exclusively in server environment (.env)
             const options: NLBrowserOptions = {
-              jev,
-              textModel,
-              maxSteps,
+              maxSteps: typeof maxSteps === 'number' ? maxSteps : undefined,
               screenshots: true,
             };
 

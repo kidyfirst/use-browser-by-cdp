@@ -34,9 +34,14 @@ export const NLBrowserView: React.FC<NLBrowserViewProps> = ({ onShowToast }) => 
   const [goal, setGoal] = useState<string>('点击页面上的 "Learn more" 链接进入详情页面');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [snapshot, setSnapshot] = useState<AgentSnapshot | null>(null);
-  const [modelsInfo, setModelsInfo] = useState<{ text_model?: string; jev_model?: string }>({});
+  const [modelsInfo, setModelsInfo] = useState<{
+    text_model?: string;
+    jev_model?: string;
+    has_jev_key?: boolean;
+    has_text_key?: boolean;
+  }>({});
 
-  // Poll current agent state on mount
+  // Poll current agent state and server environment status on mount
   useEffect(() => {
     fetch('/api/nl/state')
       .then((res) => res.json())
@@ -50,7 +55,12 @@ export const NLBrowserView: React.FC<NLBrowserViewProps> = ({ onShowToast }) => 
             setGoal(data.snapshot.goal);
           }
         }
-        setModelsInfo({ text_model: data.text_model, jev_model: data.jev_model });
+        setModelsInfo({
+          text_model: data.text_model,
+          jev_model: data.jev_model,
+          has_jev_key: data.has_jev_key,
+          has_text_key: data.has_text_key,
+        });
       })
       .catch(() => {});
   }, []);
@@ -155,14 +165,21 @@ export const NLBrowserView: React.FC<NLBrowserViewProps> = ({ onShowToast }) => 
         <div className="view-title-group">
           <h2>🤖 @moni/nl-browser 自然语言 Agent (JEV UI 决策 + LLM 文本推理)</h2>
           <p>
-            双引擎协作：JEV 模型决策界面操作（CLICK / TYPE_TEXT / DONE），LLM 仅在需要输入时填写内容
+            双引擎协作：JEV 决策操作与控件，LLM 仅在需要输入时填写内容（模型密钥从服务器端 .env 安全加载）
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-            JEV: <strong style={{ color: '#93c5fd' }}>{modelsInfo.jev_model || 'jev-latest'}</strong> | LLM:{' '}
-            <strong style={{ color: '#fbbf24' }}>{modelsInfo.text_model || 'deepseek-chat'}</strong>
+            JEV: <strong style={{ color: '#93c5fd' }}>{modelsInfo.jev_model || 'jev-latest'}</strong>{' '}
+            <span style={{ color: modelsInfo.has_jev_key ? '#34d399' : '#f87171' }}>
+              ({modelsInfo.has_jev_key ? '✓已配置' : '✗缺少Key'})
+            </span>
+            {' '}| LLM:{' '}
+            <strong style={{ color: '#fbbf24' }}>{modelsInfo.text_model || 'deepseek-chat'}</strong>{' '}
+            <span style={{ color: modelsInfo.has_text_key ? '#34d399' : '#f87171' }}>
+              ({modelsInfo.has_text_key ? '✓已配置' : '✗缺少Key'})
+            </span>
           </span>
           <div className={`status-badge ${status}`}>
             <span className="status-dot" />
@@ -174,6 +191,30 @@ export const NLBrowserView: React.FC<NLBrowserViewProps> = ({ onShowToast }) => 
       </div>
 
       <div className="view-content">
+        {/* Missing Server Key Warning Banner */}
+        {(!modelsInfo.has_jev_key || !modelsInfo.has_text_key) && (
+          <div
+            style={{
+              background: 'rgba(245, 158, 11, 0.1)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              borderRadius: 'var(--radius-md)',
+              padding: '10px 16px',
+              fontSize: '12px',
+              color: '#fbbf24',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <span>⚠️</span>
+            <span>
+              服务器未检测到完整模型密钥。请在项目根目录或 <code>apps/web-demo</code> 目录下配置{' '}
+              <code>.env</code> 文件（可复制 <code>.env.example</code>），设置{' '}
+              <code>TYPESAFE_API_KEY</code> 与 <code>TEXT_MODEL_API_KEY</code>。
+            </span>
+          </div>
+        )}
+
         {/* Task Input Card */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

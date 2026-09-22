@@ -108,16 +108,39 @@ export function cdpAgentMiddleware(
 
   // 2. CDP Driver status check
   if (url.pathname === '/api/agent/status' && req.method === 'GET') {
-    const currentUrl = activeNLAgent?.state.page.url || activeBrowser?.currentUrl || null;
-    const targetId = activeNLAgent?.state.browser.targetId || activeBrowser?.targetId || null;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(
-      JSON.stringify({
-        connected: Boolean(activeBrowser || activeNLAgent),
-        url: currentUrl,
-        targetId,
-      })
-    );
+    (async () => {
+      let cdpAvailable = false;
+      let browserVersion: string | null = null;
+      try {
+        const cdpRes = await fetch('http://127.0.0.1:9222/json/version', {
+          signal: AbortSignal.timeout(1000),
+        });
+        if (cdpRes.ok) {
+          const cdpInfo = (await cdpRes.json()) as any;
+          cdpAvailable = true;
+          browserVersion = cdpInfo.Browser || null;
+        }
+      } catch {
+        cdpAvailable = false;
+      }
+
+      const currentUrl = activeNLAgent?.state.page.url || activeBrowser?.currentUrl || null;
+      const targetId = activeNLAgent?.state.browser.targetId || activeBrowser?.targetId || null;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(
+        JSON.stringify({
+          connected: Boolean(activeBrowser || activeNLAgent),
+          cdpAvailable,
+          browserVersion,
+          url: currentUrl,
+          targetId,
+        })
+      );
+    })().catch((err) => {
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ error: err.message }));
+    });
     return;
   }
 

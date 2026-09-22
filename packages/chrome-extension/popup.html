@@ -29,21 +29,23 @@
       <!-- CDP Launch Guidance (Shown if CDP / Server not detected) -->
       <div id="cdpGuideBanner" class="banner warning" style="display: none;">
         <div style="font-weight: 600; display: flex; align-items: center; gap: 6px;">
-          <span>⚠️ 未检测到 CDP 调试端口 (9222)</span>
+          <span id="cdpBannerTitle">⚠️ 未检测到 CDP 调试端口 (9222)</span>
         </div>
-        <div style="font-size: 11px; color: #fde68a;">
+        <div id="cdpBannerDesc" style="font-size: 11px; color: #fde68a;">
           Chrome 需开启 <code>--remote-debugging-port=9222</code>，并在项目根目录运行 <code>pnpm dev</code>。
         </div>
 
-        <div style="display: flex; gap: 4px; margin-top: 4px;">
-          <button type="button" class="copy-btn" id="tabMacBtn" style="font-weight: bold;">macOS</button>
-          <button type="button" class="copy-btn" id="tabWinBtn">Windows</button>
-          <button type="button" class="copy-btn" id="tabLinuxBtn">Linux</button>
-        </div>
+        <div id="cdpCommandArea">
+          <div style="display: flex; gap: 4px; margin-top: 4px;">
+            <button type="button" class="copy-btn" id="tabMacBtn" style="font-weight: bold;">macOS</button>
+            <button type="button" class="copy-btn" id="tabWinBtn">Windows</button>
+            <button type="button" class="copy-btn" id="tabLinuxBtn">Linux</button>
+          </div>
 
-        <div class="code-snippet-box">
-          <span id="launchCommandText" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
-          <button type="button" class="copy-btn" id="copyCmdBtn">复制启动命令</button>
+          <div class="code-snippet-box">
+            <span id="launchCommandText" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+            <button type="button" class="copy-btn" id="copyCmdBtn">复制启动命令</button>
+          </div>
         </div>
       </div>
 

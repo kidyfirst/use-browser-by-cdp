@@ -37,22 +37,65 @@ async function initActiveTabUrl(): Promise<void> {
 async function refreshCDPStatus(): Promise<void> {
   const indicator = document.getElementById('statusIndicator');
   const banner = document.getElementById('cdpGuideBanner');
+  const bannerTitle = document.getElementById('cdpBannerTitle');
+  const bannerDesc = document.getElementById('cdpBannerDesc');
+  const commandArea = document.getElementById('cdpCommandArea');
 
   const status = await checkCDPStatus(currentSettings.serverUrl);
 
-  if (status.serverRunning && status.connected) {
+  if (status.cdpPortOpen && status.serverRunning) {
+    // Both CDP port 9222 and local server are ready!
     if (indicator) {
       indicator.className = 'status-dot online';
-      indicator.title = `CDP 已连接: ${status.currentUrl || 'Active'}`;
+      indicator.title = status.connected
+        ? `CDP 任务运行中: ${status.currentUrl || 'Active'}`
+        : `✓ CDP (9222) 与本地服务已就绪 (${status.browserVersion || 'Chrome'})`;
     }
     if (banner) banner.style.display = 'none';
-  } else {
+  } else if (status.cdpPortOpen && !status.serverRunning) {
+    // Port 9222 is open, but local pnpm dev server is not running
     if (indicator) {
       indicator.className = 'status-dot';
-      indicator.title = `CDP / 服务未就绪: ${status.error || 'Offline'}`;
+      indicator.title = '本地服务未连接 (http://localhost:5173)';
     }
-    if (banner) banner.style.display = 'flex';
-    updateLaunchCommand();
+    if (banner) {
+      banner.style.display = 'flex';
+      if (bannerTitle) bannerTitle.textContent = '⚠️ 本地后台服务未启动';
+      if (bannerDesc) {
+        bannerDesc.innerHTML = `已检测到 Chrome 9222 调试端口就绪，但后台服务 (${currentSettings.serverUrl}) 未响应。<br />请在项目根目录终端运行 <code>pnpm dev</code>。`;
+      }
+      if (commandArea) commandArea.style.display = 'none';
+    }
+  } else if (!status.cdpPortOpen && status.serverRunning) {
+    // Server is running, but Chrome port 9222 is not open
+    if (indicator) {
+      indicator.className = 'status-dot';
+      indicator.title = '未检测到 Chrome 9222 调试端口';
+    }
+    if (banner) {
+      banner.style.display = 'flex';
+      if (bannerTitle) bannerTitle.textContent = '⚠️ 未检测到 CDP 调试端口 (9222)';
+      if (bannerDesc) {
+        bannerDesc.innerHTML = `后台服务正常运行，但 Chrome 尚未开启 9222 端口。<br />如已打开 Chrome，请先完全退出 (Cmd+Q) 或使用下方命令启动独立调试实例：`;
+      }
+      if (commandArea) commandArea.style.display = 'block';
+      updateLaunchCommand();
+    }
+  } else {
+    // Neither is running
+    if (indicator) {
+      indicator.className = 'status-dot';
+      indicator.title = 'CDP 端口与后台服务均未就绪';
+    }
+    if (banner) {
+      banner.style.display = 'flex';
+      if (bannerTitle) bannerTitle.textContent = '⚠️ 未检测到 CDP 调试端口与后台服务';
+      if (bannerDesc) {
+        bannerDesc.innerHTML = `需开启 <code>--remote-debugging-port=9222</code>，并在项目根目录运行 <code>pnpm dev</code>。`;
+      }
+      if (commandArea) commandArea.style.display = 'block';
+      updateLaunchCommand();
+    }
   }
 }
 
@@ -307,4 +350,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupChipsAndPresets();
   setupTaskActions();
   await refreshCDPStatus();
+  // Auto refresh CDP & server status every 3 seconds while popup is open
+  setInterval(() => {
+    refreshCDPStatus();
+  }, 3000);
 });

@@ -1,0 +1,43 @@
+{
+  "name": "@moni/nl-browser",
+  "version": "0.1.0",
+  "description": "Autonomous natural language browser automation agent powered by @moni/cdp-driver, JEV UI policy model, and LLM text helper",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm run test && pnpm run build",
+    "publish:dry": "npm publish --dry-run",
+    "publish:pkg": "npm publish --access public"
+  },
+  "dependencies": {
+    "@moni/cdp-driver": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.12",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  },
+  "keywords": [
+    "browser-agent",
+    "natural-language",
+    "cdp",
+    "automation",
+    "ai-agent",
+    "jev"
+  ],
+  "license": "MIT"
+}

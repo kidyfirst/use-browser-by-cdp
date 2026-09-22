@@ -6,9 +6,10 @@
   "scripts": {
     "build": "pnpm -r run build",
     "dev": "pnpm --filter @moni/web-demo dev",
-    "test": "pnpm --filter @moni/cdp-driver test",
+    "test": "pnpm -r --filter \"@moni/cdp-driver\" --filter \"@moni/nl-browser\" test",
     "typecheck": "pnpm -r run typecheck",
-    "publish:driver": "pnpm --filter @moni/cdp-driver run prepublishOnly && pnpm --filter @moni/cdp-driver publish --access public"
+    "publish:driver": "pnpm --filter @moni/cdp-driver run prepublishOnly && pnpm --filter @moni/cdp-driver publish --access public",
+    "publish:nl": "pnpm --filter @moni/nl-browser run prepublishOnly && pnpm --filter @moni/nl-browser publish --access public"
   },
   "devDependencies": {
     "typescript": "^5.5.4"

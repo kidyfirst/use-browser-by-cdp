@@ -62,6 +62,22 @@ importers:
         specifier: ^2.0.5
         version: 2.1.9(@types/node@20.19.43)
 
+  packages/nl-browser:
+    dependencies:
+      '@moni/cdp-driver':
+        specifier: workspace:*
+        version: link:../cdp-driver
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.19.43
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.9(@types/node@20.19.43)
+
 packages:
 
   '@babel/code-frame@7.29.7':
